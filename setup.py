@@ -6,12 +6,12 @@ install_requires = [
     'boto3'
 ]
 
-with open('README') as f:
+with open('README.rst') as f:
     readme = f.read()
 
 setup(
     name='awsrequests',
-    version='0.0.1',
+    version='0.0.2',
     packages=['awsrequests'],
     url='https://github.com/djcrabhat/aws-requests',
     license='djcrabhat@sosimplerecords.com',
