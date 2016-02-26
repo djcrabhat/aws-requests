@@ -3,8 +3,10 @@ import requests
 try:
     # TODO: there's gotta be a less drastic way to do this
     from urlparse import urlparse as url_parse
+    from urlparse import quote
 except:
     from urllib.parse import urlparse as url_parse
+    from urllib.parse import quote
 
 #  Key derivation functions. See:
 # http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html#signature-v4-examples-python
@@ -35,7 +37,7 @@ def get_headers_for_request(url, region, service, access_key, secret_key, sessio
     # string (use '/' if no path)
     parsed=url_parse(url)
     host = parsed.netloc
-    canonical_uri = parsed.path
+    canonical_uri = quote(parsed.path)
 
     # Step 3: Create the canonical query string. In this example (a GET request),
     # request parameters are in the query string. Query string values must
