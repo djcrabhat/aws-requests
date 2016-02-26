@@ -2,10 +2,14 @@ import requests
 import os
 from .signing import get_headers_for_request
 
-import botocore.credentials
-import botocore.session
-import botocore.exceptions
-import boto3
+try:
+    HAS_BOTO=True
+    import botocore.credentials
+    import botocore.session
+    import botocore.exceptions
+    import boto3
+except:
+    HAS_BOTO=False
 
 # Set default logging handler to avoid "No handler found" warnings.
 import logging
@@ -29,7 +33,7 @@ class AwsRequester(object):
             if session_token:
                 self.session_token = session_token
                 self.session_expires = session_expires
-        else:
+        elif HAS_BOTO:
             # hijack botocore's method.  probably fragile!
             session = botocore.session.Session()
             resolver = botocore.credentials.create_credential_resolver(session)
@@ -41,6 +45,8 @@ class AwsRequester(object):
                 self.session_token = creds.token
             else:
                 raise EnvironmentError("could not find AWS creds anywhere!")
+        else:
+            raise EnvironmentError("could not find AWS creds (don't have boto3, so didn't look anywhere fancy)")
 
     def assume_role(self, role_arn):
         sts_client = boto3.client('sts',
@@ -73,7 +79,8 @@ class AwsRequester(object):
                 stream=None,
                 verify=None,
                 cert=None,
-                json=None):
+                json=None,
+                time=None):
         """Constructs and sends a :class:`Request <Request>`.
         :param method: method for the new :class:`Request` object.
         :param url: URL for the new :class:`Request` object.
@@ -94,6 +101,7 @@ class AwsRequester(object):
         :param verify: (optional) if ``True``, the SSL cert will be verified. A CA_BUNDLE path can also be provided.
         :param stream: (optional) if ``False``, the response content will be immediately downloaded.
         :param cert: (optional) if String, path to ssl client cert file (.pem). If Tuple, ('cert', 'key') pair.
+        :param time: (optional) time to put on the request
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
@@ -121,7 +129,8 @@ class AwsRequester(object):
                                                    self.secret_key,
                                                    self.session_token,
                                                    payload=prepped.body,
-                                                   method=prepped.method)
+                                                   method=prepped.method,
+                                                   t=time)
         prepped.headers.update(aws_auth_headers)
 
         response = session.send(prepped,

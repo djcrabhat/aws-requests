@@ -3,7 +3,7 @@ import requests
 try:
     # TODO: there's gotta be a less drastic way to do this
     from urlparse import urlparse as url_parse
-    from urlparse import quote
+    from urllib import quote
 except:
     from urllib.parse import urlparse as url_parse
     from urllib.parse import quote
@@ -22,9 +22,10 @@ def getSignatureKey(key, dateStamp, regionName, serviceName):
 
 
 
-def get_headers_for_request(url, region, service, access_key, secret_key, session_token=None, payload='', headers={}, method='GET'):
+def get_headers_for_request(url, region, service, access_key, secret_key, session_token=None, payload='', headers={}, method='GET', t=None):
     # Create a date for headers and the credential string
-    t = datetime.datetime.utcnow()
+    if not t:
+        t = datetime.datetime.utcnow()
     amzdate = t.strftime('%Y%m%dT%H%M%SZ')
     datestamp = t.strftime('%Y%m%d') # Date w/o time, used in credential scope
 
