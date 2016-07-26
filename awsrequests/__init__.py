@@ -33,7 +33,7 @@ class AwsRequester(AWSConnections):
                             that amazon offers through boto3
         :param: region = region to connect to
         :param: aws_account = aws account # to access
-        :param: role = role used for your arn 'arn:aws:iam::123:role/RoleAssume'
+        :param: role = role used for your arn
         :param: role_name = the name in which will be seen through the
                             aws cloudtrails
 
