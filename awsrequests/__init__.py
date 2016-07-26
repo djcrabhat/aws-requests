@@ -25,6 +25,25 @@ logging.getLogger(__name__).addHandler(NullHandler())
 
 class AwsRequester(AWSConnections):
     def __init__(self, **kwargs):
+        """
+        **kwargs gets set to self.args as a dict
+
+        REQUIRED
+        :param: aws_asset = 'ec2', 'sts', 's3', 'dynamodb', any of the services
+                            that amazon offers through boto3
+        :param: region = region to connect to
+        :param: aws_account = aws account # to access
+        :param: role = role used for your arn 'arn:aws:iam::123:role/RoleAssume'
+        :param: role_name = the name in which will be seen through the
+                            aws cloudtrails
+
+        OPTIONAL
+        :param: assume
+
+        arn gets automagically generated when self.loadClient() is called:
+
+        arn:aws:iam::${aws_account}:role/${role}
+        """
         self.args = kwargs
         # example args
         #self.args['aws_asset'] = 'ec2'
