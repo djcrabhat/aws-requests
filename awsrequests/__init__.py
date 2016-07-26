@@ -1,6 +1,7 @@
 import requests
 import os
 from .signing import get_headers_for_request
+from .connections import AWSConnections
 
 try:
     HAS_BOTO=True
@@ -22,48 +23,40 @@ except ImportError:
             pass
 logging.getLogger(__name__).addHandler(NullHandler())
 
-class AwsRequester(object):
-    def __init__(self, region, access_key=None, secret_key=None, session_token=None, session_expires=None):
-        self.session_token = None
-        self.session_expires = None
-        self.region = region
-        if access_key is not None and secret_key is not None:
-            self.access_key = access_key
-            self.secret_key = secret_key
-            if session_token:
-                self.session_token = session_token
-                self.session_expires = session_expires
-        elif HAS_BOTO:
-            # hijack botocore's method.  probably fragile!
-            session = botocore.session.Session()
-            resolver = botocore.credentials.create_credential_resolver(session)
-            creds = resolver.load_credentials()
-            if creds is not None:
-                self.credentials = creds
-                self.access_key = creds.access_key
-                self.secret_key = creds.secret_key
-                self.session_token = creds.token
-            else:
-                raise EnvironmentError("could not find AWS creds anywhere!")
-        else:
-            raise EnvironmentError("could not find AWS creds (don't have boto3, so didn't look anywhere fancy)")
+class AwsRequester(AWSConnections):
+    def __init__(self, **kwargs):
+        """
+        **kwargs gets set to self.args as a dict
 
-    def assume_role(self, role_arn):
-        sts_client = boto3.client('sts',
-                                  region_name=self.region,
-                                  aws_access_key_id=self.access_key,
-                                  aws_secret_access_key=self.secret_key)
-        try:
+        REQUIRED
+        :param: aws_asset = 'ec2', 'sts', 's3', 'dynamodb', any of the services
+                            that amazon offers through boto3
+        :param: region = region to connect to
+        :param: aws_account = aws account # to access
+        :param: role = role used for your arn
+        :param: role_name = the name in which will be seen through the
+                            aws cloudtrails
 
-            temp_security_creds = sts_client.assume_role(RoleArn=role_arn,
-                                                         RoleSessionName="AwsBootstrapper"
-                                                         )
-            self.access_key = temp_security_creds["Credentials"]["AccessKeyId"]
-            self.secret_key = temp_security_creds["Credentials"]["SecretAccessKey"]
-            self.session_token = temp_security_creds["Credentials"]["SessionToken"]
-            self.session_expires = temp_security_creds["Credentials"]["Expiration"]
-        except botocore.exceptions.BotoCoreError as e:
-            raise Exception("error assuming role: {0}".format(e.args))
+        OPTIONAL
+        :param: assume
+
+        arn gets automagically generated when self.loadClient() is called:
+
+        arn:aws:iam::${aws_account}:role/${role}
+        """
+        self.args = kwargs
+        # example args
+        #self.args['aws_asset'] = 'ec2'
+        #self.args['region'] = 'us-east-1'
+        #self.args['aws_account'] = '123456789098'
+        #self.args['role'] = 'RoleAssume'
+        #self.args['role_name'] = 'Example'
+        # if you want to use boto3 sts, set this value to true
+        #self.args['assume'] = True
+        self.loadClient()
+
+    def loadClient(self):
+        self.client = self.login()
 
     def request(self, method, url,
                 params=None,
@@ -122,15 +115,18 @@ class AwsRequester(object):
                                hooks=hooks
                                )
         prepped = req.prepare()
-        aws_auth_headers = get_headers_for_request(url,
-                                                   self.region,
-                                                   'execute-api',
-                                                   self.access_key,
-                                                   self.secret_key,
-                                                   self.session_token,
-                                                   payload=prepped.body,
-                                                   method=prepped.method,
-                                                   t=time)
+        aws_auth_headers = get_headers_for_request(
+                url,
+                self.args['region'],
+                'execute-api',
+                self.temp_creds["Credentials"]["AccessKeyId"],
+                self.temp_creds["Credentials"]
+                               ['SecretAccessKey'],
+                self.temp_creds["Credentials"]["SessionToken"],
+                payload=prepped.body,
+                method=prepped.method,
+                t=time
+                )
         prepped.headers.update(aws_auth_headers)
 
         response = session.send(prepped,
