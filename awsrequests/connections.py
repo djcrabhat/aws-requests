@@ -41,3 +41,14 @@ class AWSConnections(object):
                 region_name=self.args['region']
                 )
         return self.client
+
+    def login(self):
+        if not self.args.has_key('assume') \
+           or self.args['assume'] is False:
+            self.setClient()
+        else:
+            if self.args['assume'] is True:
+                self.assumeAccount()
+            else:
+                print "Unable to login.  Ensure assume == True if you want to use sts"
+

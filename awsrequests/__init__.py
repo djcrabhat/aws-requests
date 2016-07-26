@@ -29,14 +29,15 @@ class AwsRequester(AWSConnections):
         # example args
         #self.args['aws_asset'] = 'ec2'
         #self.args['region'] = 'us-east-1'
-        #self.args['aws_account'] = '651193231129'
         #self.args['aws_account'] = '123456789098'
         #self.args['role'] = 'RoleAssume'
         #self.args['role_name'] = 'Example'
+        # if you want to use boto3 sts, set this value to true
+        #self.args['assume'] = True
         self.loadClient()
 
     def loadClient(self):
-        self.client = self.assumeAccount()
+        self.client = self.login()
 
     def request(self, method, url,
                 params=None,
