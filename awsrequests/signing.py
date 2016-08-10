@@ -64,7 +64,11 @@ def get_headers_for_request(url, region, service, access_key, secret_key, sessio
 
     if payload is None:
         payload=''
-    payload_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    # handle differences between library requests 2.11.0 and previous
+    if type(payload) is bytes:
+        payload_hash = hashlib.sha256(payload).hexdigest()
+    else:
+        payload_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     # Step 7: Combine elements to create create canonical request
     canonical_request = method + '\n' + canonical_uri + '\n' + canonical_querystring + '\n' + canonical_headers + '\n' + signed_headers + '\n' + payload_hash
