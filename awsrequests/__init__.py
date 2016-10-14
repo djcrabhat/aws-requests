@@ -122,7 +122,7 @@ class AwsRequester(object):
                                hooks=hooks
                                )
         prepped = req.prepare()
-        aws_auth_headers = get_headers_for_request(url,
+        aws_auth_headers = get_headers_for_request(prepped.url,
                                                    self.region,
                                                    'execute-api',
                                                    self.access_key,
