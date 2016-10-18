@@ -1,4 +1,5 @@
 import requests
+from collections import OrderedDict
 import os
 from .signing import get_headers_for_request
 
@@ -114,7 +115,7 @@ class AwsRequester(object):
         req = requests.Request(method, url,
                                data=data,
                                headers=headers,
-                               params=params,
+                               params=OrderedDict(sorted(params.items())),
                                cookies=cookies,
                                files=files,
                                auth=auth,
