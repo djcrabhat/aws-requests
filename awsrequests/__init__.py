@@ -115,7 +115,7 @@ class AwsRequester(object):
         req = requests.Request(method, url,
                                data=data,
                                headers=headers,
-                               params=OrderedDict(sorted(params.items())),
+                               params=params,
                                cookies=cookies,
                                files=files,
                                auth=auth,
