@@ -1,12 +1,20 @@
-import sys, os, base64, datetime, hashlib, hmac
-import requests
+import base64
+from collections import OrderedDict
+import datetime
+import hashlib
+import hmac
+import os
+import sys
 try:
-    # TODO: there's gotta be a less drastic way to do this
-    from urlparse import urlparse as url_parse
-    from urllib import quote
-except:
+    from urllib.parse import parse_qs, quote, unquote, urlencode
     from urllib.parse import urlparse as url_parse
-    from urllib.parse import quote
+except ImportError: # fallback to Python 2
+    from urlparse import parse_qs
+    from urlparse import urlparse as url_parse
+    from urllib import quote, unquote, urlencode
+
+import requests
+
 
 #  Key derivation functions. See:
 # http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html#signature-v4-examples-python
@@ -44,7 +52,8 @@ def get_headers_for_request(url, region, service, access_key, secret_key, sessio
     # request parameters are in the query string. Query string values must
     # be URL-encoded (space=%20). The parameters must be sorted by name.
     # For this example, the query string is pre-formatted in the request_parameters variable.
-    canonical_querystring = parsed.query
+    params = OrderedDict(sorted(parse_qs(parsed.query).items())) if parsed.query else {}
+    canonical_querystring = unquote(urlencode(params, doseq=True))
 
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
