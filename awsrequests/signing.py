@@ -1,12 +1,20 @@
-import sys, os, base64, datetime, hashlib, hmac
-import requests
+import base64
+from collections import OrderedDict
+import datetime
+import hashlib
+import hmac
+import os
+import sys
 try:
-    # TODO: there's gotta be a less drastic way to do this
-    from urlparse import urlparse as url_parse
-    from urllib import quote
-except:
+    from urllib.parse import parse_qs, quote, unquote, urlencode
     from urllib.parse import urlparse as url_parse
-    from urllib.parse import quote
+except ImportError: # fallback to Python 2
+    from urlparse import parse_qs
+    from urlparse import urlparse as url_parse
+    from urllib import quote, unquote, urlencode
+
+import requests
+
 
 #  Key derivation functions. See:
 # http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html#signature-v4-examples-python
