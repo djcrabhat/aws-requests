@@ -110,7 +110,7 @@ class AwsRequester(object):
         session = requests.sessions.Session()
         # TODO: build auth headers here
 
-        # TODO: build query params if they were passed in sepeartely
+        # TODO: build query params if they were passed in separately
 
         req = requests.Request(method, url,
                                data=data,
