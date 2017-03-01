@@ -53,7 +53,7 @@ def get_headers_for_request(url, region, service, access_key, secret_key, sessio
     # be URL-encoded (space=%20). The parameters must be sorted by name.
     # For this example, the query string is pre-formatted in the request_parameters variable.
     params = OrderedDict(sorted(parse_qs(parsed.query).items())) if parsed.query else {}
-    canonical_querystring = unquote(urlencode(params, doseq=True))
+    canonical_querystring = urlencode(params, doseq=True)
 
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
