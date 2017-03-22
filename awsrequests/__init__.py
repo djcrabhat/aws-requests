@@ -78,7 +78,7 @@ class AwsRequester(object):
                 proxies=None,
                 hooks=None,
                 stream=None,
-                verify=None,
+                verify=True,
                 cert=None,
                 json=None,
                 time=None):
