@@ -49,7 +49,7 @@ class AwsRequester(object):
         else:
             raise EnvironmentError("could not find AWS creds (don't have boto3, so didn't look anywhere fancy)")
 
-    def assume_role(self, role_arn):
+    def assume_role(self, role_arn, role_session_name="AwsBootstrapper", **kwargs):
         sts_client = boto3.client('sts',
                                   region_name=self.region,
                                   aws_access_key_id=self.access_key,
@@ -57,7 +57,8 @@ class AwsRequester(object):
         try:
 
             temp_security_creds = sts_client.assume_role(RoleArn=role_arn,
-                                                         RoleSessionName="AwsBootstrapper"
+                                                         RoleSessionName=role_session_name,
+                                                         **kwargs
                                                          )
             self.access_key = temp_security_creds["Credentials"]["AccessKeyId"]
             self.secret_key = temp_security_creds["Credentials"]["SecretAccessKey"]
