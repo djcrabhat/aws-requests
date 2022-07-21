@@ -66,6 +66,7 @@ class AwsRequester(object):
             self.session_expires = temp_security_creds["Credentials"]["Expiration"]
         except botocore.exceptions.BotoCoreError as e:
             raise Exception("error assuming role: {0}".format(e.args))
+        return self
 
     def request(self, method, url,
                 params=None,
